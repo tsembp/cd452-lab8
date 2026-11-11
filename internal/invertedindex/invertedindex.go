@@ -31,15 +31,10 @@ type InvertedIndex struct {
 
 // NewInvertedIndex creates and returns a new empty InvertedIndex.
 func NewInvertedIndex(files []string) (*InvertedIndex, error) {
-	idx := &InvertedIndex{
+	return &InvertedIndex{
 		indexFiles: files,
-	}
-
-	if err := idx.ensureIndexIsLoaded(); err != nil {
-		return nil, err
-	}
-
-	return idx, nil
+		data: nil,
+	}, nil
 }
 
 // SearchScanFiles scans all index files on each search and returns matched keywords per document,
@@ -96,20 +91,19 @@ func (idx *InvertedIndex) SearchInMemory(keywords []string) ([]Result, error) {
 // searchInMemoryTopK searches the preloaded index and returns the top K results after
 // sorting the document frequencies.
 func (idx *InvertedIndex) SearchInMemoryTopK(keywords []string, k int) ([]Result, error) {
-	results, err := idx.SearchInMemory(keywords)
+	allResults, err := idx.SearchInMemory(keywords)
 	if err != nil {
 		return nil, err
 	}
 
-	if k <= 0 {
-		return results[:0], nil
+	// Cap to top K
+	if k < 0 {
+		k = 0
 	}
-
-	if k > len(results) {
-		k = len(results)
+	if k > len(allResults) {
+		k = len(allResults)
 	}
-
-	return results[:k], nil
+	return allResults[:k], nil
 }
 
 func (idx *InvertedIndex) ensureIndexIsLoaded() error {

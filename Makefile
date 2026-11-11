@@ -1,10 +1,12 @@
 .PHONY: all clean test docker docker-indexserver docker-webserver docker-push
 
 # === Build binaries ===
-all: webserver
+all: indexserver webserver generator partitioner
 
 webserver:
 	go build -o bin/webserver ./cmd/webserver
+indexserver:
+	go build -o bin/indexserver ./cmd/indexserver
 
 generator:
 	go build -o bin/generator ./tools/generator
